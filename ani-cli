@@ -216,7 +216,11 @@ update_history() {
 download() {
     case $1 in
         *m3u8*) ffmpeg -loglevel error -stats -i "$1" -c copy "$download_dir/$2.mp4" ;;
-        *) aria2c --check-certificate=false --continue --summary-interval=0 -x 16 -s 16 "$1" --dir="$download_dir" -o "$2.mp4" --download-result=hide ;;
+        *) if curl -s -m 5 "$1" | grep -q '^#EXTM3U'; then
+        ffmpeg -loglevel error -stats -i "$1" -c copy "$download_dir/$2.mp4"
+    else
+        aria2c --check-certificate=false --continue --summary-interval=0 -x 16 -s 16 "$1" --dir="$download_dir" -o "$2.mp4" --download-result=hide
+  fi ;;
     esac
 }
 
